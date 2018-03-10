@@ -54,7 +54,7 @@ def show_result(testsummary, testcode, correct, got, expected, args, verbosity):
             print("%s: Correct." % testsummary)
         if verbosity > 1:
             print('\t', testcode)
-            print
+            print()
     else:
         print("%s: Incorrect." % testsummary)
         print('\t', testcode)
@@ -70,7 +70,7 @@ def show_exception(testsummary, testcode, args):
     print('\t', args)
     print("Your code encountered the following error:")
     traceback.print_exc()
-    print
+    print()
 
 
 def get_lab_module():
@@ -156,7 +156,7 @@ def get_target_upload_filedir():
     print("Note that all files from this directory will be uploaded!")
     print("Labs should not contain large amounts of data; very-large")
     print("files will fail to upload.")
-    print
+    print()
     print("The default path is '%s'" % cwd)
     target_dir = raw_input("[%s] >>> " % cwd)
 
@@ -177,7 +177,7 @@ def get_tarball_data(target_dir, filename):
     file.add(target_dir)
     
     print("Done.")
-    print
+    print()
     print("The following files have been added:")
     
     for f in file.getmembers():

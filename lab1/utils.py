@@ -1,11 +1,11 @@
-from UserDict import DictMixin
+from collections import MutableMapping
 import re
 
 class ClobberedDictKey(Exception):
     "A flag that a variable has been assigned two incompatible values."
     pass
 
-class NoClobberDict(DictMixin):
+class NoClobberDict(MutableMapping):
     """
     A dictionary-like object that prevents its values from being
     overwritten by different values. If that happens, it indicates a
@@ -21,8 +21,8 @@ class NoClobberDict(DictMixin):
         return self._dict[key]
 
     def __setitem__(self, key, value):
-        if self._dict.has_key(key) and self._dict[key] != value:
-            raise ClobberedDictKey, (key, value)
+        if (key in self._dict) and self._dict[key] != value:
+            raise ClobberedDictKey((key, value))
 
         self._dict[key] = value
 
@@ -34,6 +34,9 @@ class NoClobberDict(DictMixin):
 
     def __iter__(self):
         return self._dict.__iter__()
+
+    def __len__(self):
+        return MutableMapping.__len__(self)
 
     def iteritems(self):
         return self._dict.iteritems()

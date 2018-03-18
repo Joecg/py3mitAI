@@ -173,7 +173,7 @@ if do_bfs:
 
     def bfs_1_testanswer(val, original_val = None):
         if val and len(val) > 0 and isinstance(val[0], dict):
-            raise Exception, "Error: Graph functions are supposed to return a list of node *names*, not node dictionaries!"
+            raise Exception("Error: Graph functions are supposed to return a list of node *names*, not node dictionaries!")
 
         return ( val and list(val) == list('SCDH') )
 
@@ -299,7 +299,6 @@ if do_dfs:
               testanswer = dfs_4_testanswer,
               expected_val = str(list("SQG"))+" or "+str(list("SAG")),
               name = 'dfs')
-
 
 ### TEST 7 ###
 
@@ -428,7 +427,6 @@ make_test(type = 'FUNCTION',
           name = 'hill_climbing'
           )
 
-
 ### TEST 15 ###
 
 def exp_graph(depth):
@@ -438,11 +436,11 @@ def exp_graph(depth):
         nodeids = range(2**(d+1), 2**(d+2))
         goal = random.choice(nodeids)
         for nodeid in nodeids:
-            parent = nodeid/2 # intentional integer division
+            parent = int(nodeid/2) # intentional integer division
             g.add_edge(str(parent), str(nodeid), 1)
     best_path = [goal]
     while goal > 0:
-        goal = goal/2 # intentional integer division
+        goal = int(goal/2) # intentional integer division
         best_path.append(goal)
     goal = best_path[0]
 
@@ -451,12 +449,13 @@ def exp_graph(depth):
         shared_parent = nodeid
         while shared_parent not in best_path:
             distance += 1
-            shared_parent = shared_parent / 2 # intentional integer division
+            shared_parent = int(shared_parent / 2) # intentional integer division
         g.set_heuristic(str(nodeid), str(goal), distance+best_path.index(shared_parent))
     return g
 
+
 hill_climbing_test_6_graph = exp_graph(10)
-hill_climbing_test_6_goal = hill_climbing_test_6_graph.heuristic.keys()[0]
+hill_climbing_test_6_goal = list(hill_climbing_test_6_graph.heuristic.keys())[0]
 hill_climbing_timing = {'START': 0}
 
 def hill_climbing_6_getargs():
@@ -694,9 +693,8 @@ make_test(type = 'FUNCTION',
 
 
 ### TEST 29 ###
-
 a_star_test_5_graph = exp_graph(11)
-a_star_test_5_goal = a_star_test_5_graph.heuristic.keys()[0]
+a_star_test_5_goal = list(a_star_test_5_graph.heuristic.keys())[0]
 a_star_timing = {'START': 0}
 
 def a_star_5_getargs():
@@ -714,7 +712,6 @@ make_test(type = 'FUNCTION',
                           % a_star_test_5_goal),
           name = 'a_star'
           )
-
 
 ### TEST 30 ###
 

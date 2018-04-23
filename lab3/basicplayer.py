@@ -3,7 +3,7 @@ from util import memoize, run_search_function
 def basic_evaluate(board):
     """
     The original focused-evaluate function from the lab.
-    The original is kept because the lab expects the code in the lab to be modified. 
+    The original is kept because the lab expects the code in the lab to be modified.
     """
     if board.is_game_over():
         # If the game has been won, we know that it must have been
@@ -29,7 +29,7 @@ def get_all_next_moves(board):
     """ Return a generator of all moves that the current player could take from this position """
     from connectfour import InvalidMoveException
 
-    for i in xrange(board.board_width):
+    for i in range(board.board_width):
         try:
             yield (i, board.do_move(i))
         except InvalidMoveException:
@@ -41,7 +41,7 @@ def is_terminal(depth, board):
     the game has ended.
     """
     return depth <= 0 or board.is_game_over()
-    
+
 def minimax_find_board_value(board, depth, eval_fn,
                              get_next_moves_fn=get_all_next_moves,
                              is_terminal_fn=is_terminal):
@@ -53,7 +53,7 @@ def minimax_find_board_value(board, depth, eval_fn,
         return eval_fn(board)
 
     best_val = None
-    
+
     for move, new_board in get_next_moves_fn(board):
         val = -1 * minimax_find_board_value(new_board, depth-1, eval_fn,
                                             get_next_moves_fn, is_terminal_fn)
@@ -65,7 +65,7 @@ def minimax_find_board_value(board, depth, eval_fn,
 def minimax(board, depth, eval_fn = basic_evaluate,
             get_next_moves_fn = get_all_next_moves,
             is_terminal_fn = is_terminal,
-            verbose = True):
+            verbose = False):
     """
     Do a minimax search to the specified depth on the specified board.
 
@@ -75,18 +75,18 @@ def minimax(board, depth, eval_fn = basic_evaluate,
 
     Returns an integer, the column number of the column that the search determines you should add a token to
     """
-    
+
     best_val = None
-    
+
     for move, new_board in get_next_moves_fn(board):
         val = -1 * minimax_find_board_value(new_board, depth-1, eval_fn,
                                             get_next_moves_fn,
                                             is_terminal_fn)
         if best_val == None or val > best_val[0]:
             best_val = (val, move, new_board)
-            
+
     if verbose:
-        print "MINIMAX: Decided on column %d with rating %d" % (best_val[1], best_val[0])
+        print("MINIMAX: Decided on column %d with rating %d" % (best_val[1], best_val[0]))
 
     return best_val[1]
 

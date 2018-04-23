@@ -38,7 +38,7 @@ class ContinuousThread(Thread):
                                           # enough time to finish it
 
         end_time = time() + timeout
-        
+
         while time() < end_time:
             self._kwargs['depth'] = depth
             self._most_recent_val = self._target(*self._args, **self._kwargs)
@@ -49,10 +49,10 @@ class ContinuousThread(Thread):
         try:
             return self._most_recent_val
         except AttributeError:
-            print "Error: You ran the search function for so short a time that it couldn't even come up with any answer at all!  Returning a random column choice..."
+            print("Error: You ran the search function for so short a time that it couldn't even come up with any answer at all!  Returning a random column choice...")
             import random
             return random.randint(0, 6)
-    
+
 def run_search_function(board, search_fn, eval_fn, timeout = 5):
     """
     Run the specified search function "search_fn" to increasing depths
@@ -72,7 +72,7 @@ def run_search_function(board, search_fn, eval_fn, timeout = 5):
 
     eval_t.setDaemon(True)
     eval_t.start()
-    
+
     eval_t.join(timeout)
 
     # Note that the thread may not actually be done eating CPU cycles yet;
@@ -120,7 +120,7 @@ class count_runs(object):
 
     my_fn()
     my_fn()
-    print my_fn.get_count()  # Prints '2'
+    print(my_fn.get_count()  # Prints '2')
     """
 
     def __init__(self, fn):
@@ -135,7 +135,7 @@ class count_runs(object):
         return self.count
 
 
-    
+
 # Some sample boards, useful for testing:
 # Obvious win
 WINNING_BOARD = ConnectFourBoard(board_array =

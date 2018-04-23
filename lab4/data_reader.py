@@ -64,11 +64,11 @@ def read_congress_data(filename):
     f.close()
     return legislators
 
-def read_vote_data(filename):
+def read_vote_data(filename, enc = 'utf-8'):
     """
     Reads a CSV file of data on the votes that were taken.
     """
-    f = open(filename)
+    f = open(filename, encoding = enc)
     csv_reader = csv.reader(f)
     votes = []
     for row in csv_reader:
@@ -83,7 +83,7 @@ def read_vote_data(filename):
     return votes
 
 def limit_votes(legislators, votes, n):
-    indices = [i for i in xrange(len(legislators[0]['votes'])-1, -1, -1) if
+    indices = [i for i in range(len(legislators[0]['votes'])-1, -1, -1) if
     is_interesting(votes[i])][:n]
 
     newleg = []

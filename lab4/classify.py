@@ -19,7 +19,7 @@ def random_split_groups(people):
     group1 = random.sample(people, len(people)/2)
     group2 = [ x for x in people if not x in group1 ]
     return (group1, group2)
-    
+
 def evaluate(factory, group1, group2, verbose=0):
     score = 0
     for (test, train) in ((group1, group2), (group2, group1)):
@@ -30,14 +30,14 @@ def evaluate(factory, group1, group2, verbose=0):
             if gold_standard == predicted:
                 score += 1
                 if verbose >= 2:
-                    print "%s: %s (correct)" % (legislator_info(legislator),
-                    predicted)
+                    print("%s: %s (correct)" % (legislator_info(legislator),
+                    predicted))
             else:
                 if verbose >= 1:
-                    print "* %s: got %s, actually %s" %\
-                    (legislator_info(legislator), predicted, gold_standard)
+                    print("* %s: got %s, actually %s" %
+                    (legislator_info(legislator), predicted, gold_standard))
     if verbose >= 1:
-        print "Accuracy: %d/%d" % (score, len(group1) + len(group2))
+        print("Accuracy: %d/%d" % (score, len(group1) + len(group2)))
     return score
 
 def hamming_distance(list1, list2):
@@ -111,7 +111,7 @@ class CongressIDTree(object):
             self.leaf_value = None
             best_disorder = INFINITY
             best_criterion = None
-            for vote_index in xrange(len(legislators[0]['votes'])):
+            for vote_index in range(len(legislators[0]['votes'])):
                 for vote_value in [1, 0, -1]:
                     yes, no = partition(legislators, vote_index, vote_value)
                     if len(yes) == 0 or len(no) == 0: continue
@@ -135,7 +135,7 @@ class CongressIDTree(object):
             disorder_func)
             self.no_branch = CongressIDTree(no_class, vote_meanings,
             disorder_func)
-    
+
     def classify(self, legislator):
         if self.leaf_value: return self.leaf_value
         vote_index, vote_value = self.criterion
@@ -150,7 +150,7 @@ class CongressIDTree(object):
     def _str(self, indent):
         if self.leaf_value:
             return str(self.leaf_value)
-        
+
         vote_index, vote_value = self.criterion
         value_name = 'Abstain/Absent'
         if vote_value == -1: value_name = 'No'

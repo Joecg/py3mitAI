@@ -137,11 +137,11 @@ make_test(type = 'FUNCTION',
           )
 
 def euclidean_distance_3_getargs():
-    return [ [random_list(3), random_list(3)] for x in xrange(30) ]
+    return [ [random_list(3), random_list(3)] for x in range(30) ]
 
 def euclidean_distance_3_testanswer(val, original_val = None):
     return len(val) == 30 and all([validate_euclidean_distance(list1, list2, ans) for (ans, (list1, list2)) in zip(val, original_val) ])
-                                  
+
 
 def disorder_1_getargs():
     return [ ['Democrat','Democrat','Democrat'], ['Republican',"Republican"]]
@@ -202,7 +202,7 @@ make_test(type = 'FUNCTION',
 ## Feel free to run it, by un-commenting this block, if you're curious.
 #def eval_test_2_getargs():
 #    senate_group1, senate_group2 = crosscheck_groups(senate_people)
-#    return [ ['my_classifier'] + list(random_split_groups(senate_people)) for x in xrange(20) ]
+#    return [ ['my_classifier'] + list(random_split_groups(senate_people)) for x in range(20) ]
 #
 #def eval_test_2_testanswer(val, original_val = None):
 #    return ( val <= 5 )

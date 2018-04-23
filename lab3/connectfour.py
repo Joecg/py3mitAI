@@ -1,9 +1,6 @@
 import unicodedata
 import sys
 
-# Python 2.3 compatibiliy with sets
-if not 'set' in globals():
-    from sets import Set as set
 
 def reverse(lst):
     """
@@ -15,7 +12,7 @@ def reverse(lst):
     retVal = list(lst)
     retVal.reverse()
     return retVal
-    
+
 def transpose(matrix):
     """ Transpose a matrix (defined as a list of lists, where each sub-list is a row in the matrix) """
     # This feels dirty somewhow; but it does do exactly what I want
@@ -45,7 +42,7 @@ class NonexistentMoveException(Exception):
     """ Raised if you try to request information on a move that does not exist """
     pass
 
-    
+
 class ConnectFourBoard(object):
     """ Store a Connect-Four Board
 
@@ -55,14 +52,22 @@ class ConnectFourBoard(object):
 
     A Connect-Four board is a matrix, laid out as follows:
 
-         0 1 2 3 4 5 6 7
-       0 * * * * * * * *
-       1 * * * * * * * *
-       2 * * * * * * * *
-       3 * * * * * * * *
-       4 * * * * * * * *
-       5 * * * * * * * *
-       6 * * * * * * * *
+         | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+       ----------------------------------|
+       0 | * | * | * | * | * | * | * | * |
+       ----------------------------------|
+       1 | * | * | * | * | * | * | * | * |
+       ----------------------------------|
+       2 | * | * | * | * | * | * | * | * |
+       ----------------------------------|
+       3 | * | * | * | * | * | * | * | * |
+       ----------------------------------|
+       4 | * | * | * | * | * | * | * | * |
+       ----------------------------------|
+       5 | * | * | * | * | * | * | * | * |
+       ----------------------------------|
+       6 | * | * | * | * | * | * | * | * |
+       ----------------------------------|
 
     Board columns fill from the bottom (ie., row 6).
     """
@@ -80,7 +85,7 @@ class ConnectFourBoard(object):
     board_symbol_mapping_ascii = { 0: ' ',
                                    1: 'X',
                                    2: 'O' }
-    
+
     def __init__(self, board_array = None, board_already_won = None, modified_column = None, current_player = 1, previous_move = -1):
         """ Create a new ConnectFourBoard
 
@@ -99,7 +104,7 @@ class ConnectFourBoard(object):
         """
         if sys.stdout.encoding and 'UTF' not in sys.stdout.encoding: # If we don't support Unicode
             self.board_symbol_mapping = self.board_symbol_mapping_ascii
-        
+
         if board_array == None:
             self._board_array = ( ( 0, ) * self.board_width , ) * self.board_height
         else:
@@ -112,7 +117,7 @@ class ConnectFourBoard(object):
         #    self._is_win = self._is_win_from_cell(self.get_height_of_column(modified_column), modified_column)
         #else:
         self._is_win = self.is_win()
-            
+
         self.current_player = current_player
 
     def get_current_player_id(self):
@@ -125,7 +130,7 @@ class ConnectFourBoard(object):
             return 2
         else:
             return 1
-        
+
     def get_board_array(self):
         """ Return the board array representing this board (as a tuple of tuples) """
         return self._board_array
@@ -146,7 +151,7 @@ class ConnectFourBoard(object):
         Return the index of the first cell in the specified column that is filled.
         Return ConnectFourBoard.board_height if the column is empty.
         """
-        for i in xrange(self.board_height):
+        for i in range(self.board_height):
             if self._board_array[i][column] != 0:
                 return i-1
 
@@ -158,7 +163,7 @@ class ConnectFourBoard(object):
         Return 0 if it is unclaimed.
         """
         return self._board_array[row][col]
-    
+
     def do_move(self, column):
         """
         Execute the specified move as the specified player.
@@ -172,7 +177,7 @@ class ConnectFourBoard(object):
 
         new_board = list( transpose( self.get_board_array() ) )
         target_col = [ x for x in new_board[column] if x != 0 ]
-        target_col = [0 for x in xrange(self.board_height - len(target_col) - 1) ] + [ player_id ] + target_col
+        target_col = [0 for x in range(self.board_height - len(target_col) - 1) ] + [ player_id ] + target_col
 
         new_board[column] = target_col
         new_board = transpose(new_board)
@@ -185,7 +190,7 @@ class ConnectFourBoard(object):
     def _is_win_from_cell(self, row, col):
         """ Determines if there is a winning set of four connected nodes containing the specified cell """
         return ( self._max_length_from_cell(row, col) >= 4 )
-        
+
     def _max_length_from_cell(self, row, col):
         """ Return the max-length chain containing this cell """
         return max( self._contig_vector_length(row, col, (1,1)) + self._contig_vector_length(row, col, (-1,-1)) + 1,
@@ -214,8 +219,8 @@ class ConnectFourBoard(object):
         0 if the player has no tokens on the board
         """
         longest = 0
-        for i in xrange(self.board_height):
-            for j in xrange(self.board_width):
+        for i in range(self.board_height):
+            for j in range(self.board_width):
                 if self.get_cell(i,j) == playerid:
                     longest = max( longest, self._max_length_from_cell(i,j) )
 
@@ -242,7 +247,7 @@ class ConnectFourBoard(object):
                 reverse(self._contig_vector_cells(row, col, (1,1))) + [(row, col)] + self._contig_vector_cells(row, col, (-1,-1)),
                  reverse(self._contig_vector_cells(row, col, (1,0))) + [(row, col)] + self._contig_vector_cells(row, col, (-1,0)),
                 reverse(self._contig_vector_cells(row, col, (0,1))) + [(row, col)] + self._contig_vector_cells(row, col, (0,-1)),
-                reverse(self._contig_vector_cells(row, col, (-1,1))) + [(row, col)] + self._contig_vector_cells(row, col, (1,-1)) 
+                reverse(self._contig_vector_cells(row, col, (-1,1))) + [(row, col)] + self._contig_vector_cells(row, col, (1,-1))
                  ] ]
 
     def chain_cells(self, playerid):
@@ -257,7 +262,7 @@ class ConnectFourBoard(object):
 
         This would indicate a contiguous string of tokens from (0,1)-(0,3) and (0,1)-(1,1).
 
-        The coordinates within a tuple are weakly ordered: any coordinates that are 
+        The coordinates within a tuple are weakly ordered: any coordinates that are
         adjacent in a tuple are also adjacent on the board.
 
         Note that single lone tokens are regarded as chains of length 1.  This is
@@ -275,14 +280,14 @@ class ConnectFourBoard(object):
         as is this collection of chains.
         """
         retVal = set()
-        for i in xrange(self.board_height):
-            for j in xrange(self.board_width):
+        for i in range(self.board_height):
+            for j in range(self.board_width):
                 if self.get_cell(i,j) == playerid:
                     retVal.update( self._chain_sets_from_cell(i,j) )
-                    
+
         return retVal
-                    
-        
+
+
     def is_win(self):
         """
         Return the id# of the player who has won this game.
@@ -291,8 +296,8 @@ class ConnectFourBoard(object):
         #if hasattr(self, "_is_win"):
         #    return self._is_win
         #else:
-        for i in xrange(self.board_height):
-            for j in xrange(self.board_width):
+        for i in range(self.board_height):
+            for j in range(self.board_width):
                 cell_player = self.get_cell(i,j)
                 if cell_player != 0:
                     win = self._is_win_from_cell(i,j)
@@ -331,15 +336,19 @@ class ConnectFourBoard(object):
     def __unicode__(self):
         """ Return a string representation of this board """
         retVal = [ u"  " + u' '.join([str(x) for x in range(self.board_width)]) ]
-        retVal += [ unicode(i) + ' ' + u' '.join([self.board_symbol_mapping[x] for x in row]) for i, row in enumerate(self._board_array) ]
+        retVal += [ unicode(i) + ' ' + u' '.join([self.board_symbol_mapping[x]
+                                                  for x in row])
+                    for i, row in enumerate(self._board_array) ]
         return u'\n' + u'\n'.join(retVal) + u'\n'
 
     def __str__(self):
         """ Return a string representation of this board """
-        retVal = [ "  " + ' '.join([str(x) for x in range(self.board_width)]) ]
-        retVal += [ str(i) + ' ' + ' '.join([self.board_symbol_mapping_ascii[x] for x in row]) for i, row in enumerate(self._board_array) ]
-        return '\n' + '\n'.join(retVal) + '\n'
-        
+        retVal = [ "  | " + ' | '.join([str(x) for x in range(self.board_width)]) ]
+        retVal += [ str(i) + ' | ' + ' | '.join([self.board_symbol_mapping_ascii[x]
+                                             for x in row]) + ' |'
+                    for i, row in enumerate(self._board_array) ]
+        return '\n' + ('\n'+(30*'-')+'|\n').join(retVal) + '\n' + 30*'-'+'|'
+
     def __repr__(self):
         """ The string representation of a board in the Python shell """
         return self.__str__()
@@ -352,7 +361,7 @@ class ConnectFourBoard(object):
         """ Determine whether two boards are equal. """
         return ( self.get_board_array() == other.get_board_array() )
 
-    
+
 class ConnectFourRunner(object):
     """ Runs a game of Connect Four.
 
@@ -366,7 +375,7 @@ class ConnectFourRunner(object):
       is completely filled.  If the game ends with a player having four consecutive
       diagonal tokens, that player is the winner.
 
-    The game runner is implemented via callbacks:  The two players specify callbacks to be 
+    The game runner is implemented via callbacks:  The two players specify callbacks to be
     called when it's their turn.  The callback is passed two arguments, self and self.get_board().
     The function must return a value within the time specified (in seconds) by self.get_time_limit();
     otherwise the corresponding player will lose!
@@ -399,31 +408,31 @@ class ConnectFourRunner(object):
         """ Run the test defined by this test runner.  Print and return the id of the winning player. """
         player1 = (self.player1_callback, 1, self._board.board_symbol_mapping[1])
         player2 = (self.player2_callback, 2, self._board.board_symbol_mapping[2])
-        
+
         win_for_player = []
 
-        while not win_for_player and not self._board.is_tie():            
+        while not win_for_player and not self._board.is_tie():
             for callback, id, symbol in ( player1, player2 ):
                 if verbose:
                     if sys.stdout.encoding and 'UTF' in sys.stdout.encoding:
-                        print unicode(self._board)
+                        print(unicode(self._board))
                     else:
-                        print str(self._board)
+                        print(str(self._board))
 
                 has_moved = False
 
                 while not has_moved:
                     try:
                         new_column = callback(self._board.clone())
-                        print "Player %s (%s) puts a token in column %s" % (id, symbol, new_column)
+                        print("Player %s (%s) puts a token in column %s" % (id, symbol, new_column))
                         self._board = self._board.do_move(new_column)
                         has_moved = True
-                    except InvalidMoveException, e:
+                    except InvalidMoveException as e:
                         if sys.stdout.encoding and 'UTF' in sys.stdout.encoding:
-                            print unicode(e)
+                            print(unicode(e))
                         else:
-                            print str(e)
-                            print "Illegal move attempted.  Please try again."
+                            print(str(e))
+                            print("Illegal move attempted.  Please try again.")
                             continue
 
                 if self._board.is_game_over():
@@ -432,9 +441,9 @@ class ConnectFourRunner(object):
 
 
         win_for_player = self._board.is_win()
-                
-        if win_for_player != 0 and self._board.is_tie():
-            print "It's a tie!  No winner is declared."
+
+        if win_for_player == 0 and self._board.is_tie():
+            print("It's a tie!  No winner is declared.")
             return 0
         else:
             self._do_gameend(win_for_player)
@@ -442,11 +451,11 @@ class ConnectFourRunner(object):
 
     def _do_gameend(self, winner):
         """ Someone won!  Handle this eventuality. """
-        print "Win for %s!" % self._board.board_symbol_mapping[winner]
+        print("Win for %s!" % self._board.board_symbol_mapping[winner])
         if sys.stdout.encoding and 'UTF' in sys.stdout.encoding:
-            print unicode(self._board)
+            print(unicode(self._board))
         else:
-            print str(self._board)
+            print(str(self._board))
 
 
 def human_player(board):
@@ -456,17 +465,21 @@ def human_player(board):
     target = None
 
     while type(target) != int:
-        target = raw_input("Pick a column #: --> ")
+        target_string = input("Pick a column #: --> ")
         try:
-            target = int(target)
+            target = int(target_string)
+            if (0 > target) or (target > board.board_width - 1):
+                raise ValueError
         except ValueError:
-            print "Please specify an integer column number"
+            print("Please specify an integer column number between 0 and %s" %
+                  (board.board_width - 1))
+            target = None
 
     return target
 
-        
+
 def run_game(player1, player2, board = ConnectFourBoard()):
     """ Run a game of Connect Four, with the two specified players """
     game = ConnectFourRunner(player1, player2, board=board)
     return game.run_game()
-    
+

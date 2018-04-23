@@ -34,7 +34,7 @@ def sudoku_csp_problem(partial_grid=grid):
     constraints = []
 
     indices = [(i,j) for i in range(1,10) for j in range(1,10)]
-    
+
     variables = []
 
     #Initialize variables with one variable for each square.
@@ -43,7 +43,7 @@ def sudoku_csp_problem(partial_grid=grid):
             theval = [partial_grid[i-1][j-1]]
         else:
             theval = range(1,10)
-            
+
         variables.append(Variable(str(i)+','+str(j),theval))
 
     #returns i coordinate of a variable
@@ -53,8 +53,9 @@ def sudoku_csp_problem(partial_grid=grid):
     #returns j coordinate of a variable
     def j(var):
         return var.get_name()[2]
-    
-    #gives the 3x3 box a given square is in, they are numbered left to right, top to bottom.
+
+    # gives the 3x3 box a given square is in, they are
+    # numbered left to right, top to bottom.
     def getbox(stri,strj):
         i = int(stri)
         j = int(strj)
@@ -72,7 +73,7 @@ def sudoku_csp_problem(partial_grid=grid):
             elif 7<=j<=9: return 9
 
         return 'Error: Please enter i,j in the correct range'
-        
+
 
     # make list of all square sharing a row, column or box
     # no need to duplicate the other way around since this loops through all
@@ -80,11 +81,12 @@ def sudoku_csp_problem(partial_grid=grid):
     edges = []
     for v1 in variables:
         for v2 in variables:
-            if v1<>v2 and (i(v1) == i(v2) or j(v1) == j(v2) or getbox(i(v1),j(v1)) == getbox(i(v2),j(v2))):
+            if v1<>v2 and (i(v1) == i(v2) or j(v1) == j(v2) or
+                           getbox(i(v1),j(v1)) == getbox(i(v2),j(v2))):
                 edges.append((v1.get_name(),v2.get_name()))
-            
 
-    
+
+
     # not allowed to have same value for square:
     def nomatch_constraint(val_a, val_b, name_a, name_b):
         if val_a==val_b:
@@ -96,14 +98,17 @@ def sudoku_csp_problem(partial_grid=grid):
         constraints.append(
             BinaryConstraint(e[0], e[1],
                              nomatch_constraint,
-                             "Cant match squares in same row, column, or box"))
+                             "Can't match squares in "+
+                             "same row, column, or box"))
 
     return CSP(constraints, variables)
 
-# Outputs the solution given by the CSP in terms of an easily readible text form
+# Outputs the solution given by the CSP in terms of an
+# easily readible text form
 def make_solution_readable(solution):
     solstate = solution[0]
-    variables = [(v.get_name(),v.get_assigned_value()) for v in solstate.get_all_variables()]
+    variables = [(v.get_name(),v.get_assigned_value()) for v
+                 in solstate.get_all_variables()]
     output = []
     for i in range(9):
         output.append([0,0,0,0,0,0,0,0,0])
@@ -113,14 +118,14 @@ def make_solution_readable(solution):
         output[i-1][j-1] = val
 
     return output
-        
+
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         checker_type = sys.argv[1]
     else:
         checker_type = "dfs"
-        
+
     if checker_type == "dfs":
         checker = basic_constraint_checker
     elif checker_type == "fc":
@@ -136,4 +141,4 @@ if __name__ == "__main__":
 
     sol = solve_csp_problem(sudoku_csp_problem, checker, verbose=True)
     for row in make_solution_readable(sol):
-        print row
+        print(row)

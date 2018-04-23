@@ -31,8 +31,8 @@ def moose_csp_problem():
     # now we construct the set of non-adjacent seat pairs.
     nonadjacent_pairs = []
     variable_names = ["1", "2", "3", "4", "5", "6"]
-    for x in xrange(len(variable_names)):
-        for y in xrange(x,len(variable_names)):
+    for x in range(len(variable_names)):
+        for y in range(x,len(variable_names)):
             if x == y:
                 continue
             tup = (variable_names[x], variable_names[y])
@@ -49,12 +49,15 @@ def moose_csp_problem():
 
     # 1. The Moose is afraid of Palin
     def M_not_next_to_P(val_a, val_b, name_a, name_b):
-        if (val_a == "M" and val_b == "P") or (val_a == "P" and val_b == "M"):
+        if ((val_a == "M" and val_b == "P") or
+            (val_a == "P" and val_b == "M")):
             return False
         return True
     for pair in adjacent_pairs:
-        constraints.append(BinaryConstraint(pair[0], pair[1], M_not_next_to_P,
-                                            "Moose can't be next to Palin"))
+        constraints.append(BinaryConstraint(pair[0], pair[1],
+                                            M_not_next_to_P,
+                                            "Moose can't be "+
+                                            "next to Palin"))
 
     # 2. Obama and Biden must sit next to each other.
     # This constraint can be directly phrased as:
@@ -89,7 +92,7 @@ def moose_csp_problem():
                 (val_a == "B" and val_b == "O"):
             return False
         return True
-    
+
     for pair in nonadjacent_pairs:
         constraints.append(
             BinaryConstraint(pair[0], pair[1],
@@ -98,7 +101,8 @@ def moose_csp_problem():
 
     # 3. McCain and Palin must sit next to each other
     def McP_not_next_to_each_other(val_a, val_b, name_a, name_b):
-        if (val_a == "P" and val_b == "Mc") or (val_a == "Mc" and val_b == "P"):
+        if ((val_a == "P" and val_b == "Mc") or
+            (val_a == "Mc" and val_b == "P")):
             return False
         return True
 
@@ -106,7 +110,8 @@ def moose_csp_problem():
         constraints.append(
             BinaryConstraint(pair[0], pair[1],
                              McP_not_next_to_each_other,
-                             "McCain and Palin must be next to each other"))
+                             "McCain and Palin must be "+
+                             "next to each other"))
 
     # 4. Obama + Biden can't sit next to Palin or McCain
     def OB_not_next_to_McP(val_a, val_b, name_a, name_b):
@@ -120,7 +125,8 @@ def moose_csp_problem():
         constraints.append(
             BinaryConstraint(pair[0], pair[1],
                              OB_not_next_to_McP,
-                             "McCain, Palin can't be next to Obama, Biden"))
+                             "McCain, Palin can't be next "+
+                             "to Obama, Biden"))
 
     # No two seats can be occupied by the same person
     def not_same_person(val_a, val_b, name_a, name_b):
@@ -129,7 +135,8 @@ def moose_csp_problem():
         constraints.append(
             BinaryConstraint(pair[0], pair[1],
                              not_same_person,
-                             "No two seats can be occupied by the same person"))
+                             "No two seats can be occupied "+
+                             "by the same person"))
     return CSP(constraints, variables)
 
 if __name__ == "__main__":
@@ -137,8 +144,9 @@ if __name__ == "__main__":
         checker_type = sys.argv[1]
     else:
         checker_type = "dfs"
-        
+
     if checker_type == "dfs":
+        import lab4 # Use for speed comparison
         checker = basic_constraint_checker
     elif checker_type == "fc":
         import lab4

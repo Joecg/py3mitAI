@@ -31,7 +31,7 @@ class Variable:
         return self._domain[:]
 
     def is_assigned(self):
-        return self._value is not None
+        return not (self._value is None)
 
     def get_assigned_value(self):
         return self._value
@@ -336,20 +336,25 @@ def basic_constraint_checker(state, verbose=False):
         if type(constraint) == BinaryConstraint:
             var_i = state.get_variable_by_name(constraint.get_variable_i_name())
             var_j = state.get_variable_by_name(constraint.get_variable_j_name())
-
-            if not var_i.is_assigned() or not var_j.is_assigned():
+            if (not var_i.is_assigned()) or (not var_j.is_assigned()):
                 continue
         elif type(constraint) == GroupConstraint:
+            any_continue = False
             for var_name in constraint.get_variable_names():
                 var_obj = state.get_variable_by_name(var_name)
                 if not var_obj.is_assigned():
+                    any_continue = True
                     continue
+            if any_continue: continue
 
         if not constraint.check(state):
             if verbose:
                 print("CONSTRAINT-FAILS: %s" % (constraint))
             return False
     return True
+
+def count_extract(var_count_tuple):
+    return var_count_tuple[1]
 
 class CSP:
     """
@@ -380,11 +385,23 @@ class CSP:
                 raise NotImplementedError
 
         # Step 2: generate the variable map,
+        # and sort variables from most constrained to least constrained
         self.variable_map = {}
-        self.variable_order = []
+        variable_order = []
         for var in variables:
-            self.variable_map[var.get_name()] = var
-            self.variable_order.append(var.get_name())
+            var_name = var.get_name()
+            self.variable_map[var_name] = var
+            constraint_count = 0
+            for connection in self.constraint_map:
+                if var_name in connection:
+                    constraint_count += len(self.constraint_map[connection])
+            variable_order.append((var_name,
+                                   constraint_count))
+        self.variable_order = [var_name for (var_name, count) in
+                               sorted(variable_order,
+                                      key = count_extract,
+                                      reverse = True)]
+        
 
     def initial_state(self):
         """

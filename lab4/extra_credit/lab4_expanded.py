@@ -17,22 +17,16 @@ def forward_checking(state, verbose=False):
     if X is None: return True
     x = X.get_assigned_value()
     X_name = X.get_name()
-    if verbose: print('Target variable named:', X_name)
     X_constraints = state.get_constraints_by_name(X_name)
-    if verbose:
-        for c in X_constraints:
-            print(c)
     for c in X_constraints:
         if type(c) == BinaryConstraint:
             Y_name = c.get_variable_j_name()
             Y = state.get_variable_by_name(Y_name)
             Y_domain = Y.get_domain()
             for y in Y_domain:
-                if not c.check(state, value_i = x, value_j = y):
-                    Y.reduce_domain(y)
+                if not c.check(state, x, y): Y.reduce_domain(y)
                 if not Y.get_domain(): return False
         elif type(c) == GroupConstraint:
-            if verbose: print('Checking group constraint...')
             # Keep vars ordered according to constraint indexing
             var_names = c.get_variable_names()
             var_cnt = len(var_names)
@@ -42,17 +36,11 @@ def forward_checking(state, verbose=False):
             # all Falses for every value of every variable and gradually
             # replace them with Trues
             var_possibilities = [[False] * len(dom) for dom in var_dom]
-            if verbose: print('var_dom =', var_dom)
             for var_combo in itertools.product(*var_dom):
                 if c.check(state, values = var_combo):
                     for var_idx in range(var_cnt):
                         val_idx = var_dom[var_idx].index(var_combo[var_idx])
                         var_possibilities[var_idx][val_idx] = True
-            if verbose:
-                for var_idx in range(var_cnt):
-                    print(var_names[var_idx], ':\n',
-                          var_dom[var_idx], '\n',
-                          var_possibilities[var_idx])
             for var_idx in range(var_cnt):
                 var_name = var_names[var_idx]
                 var_obj = state.get_variable_by_name(var_name)

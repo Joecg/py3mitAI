@@ -9,7 +9,7 @@ from csp_expanded import basic_constraint_checker, GroupConstraint
 
 guests = ('Joe', 'Scarlett', 'DaveJr', 'Megan',
           'Matt', 'Heather', 'Lizzie', 'Grace')
-tables = list('1234')
+tables = list('123')
 tablesize = 4
 
 def couples_together(val_a, val_b, name_a, name_b):
@@ -18,7 +18,7 @@ def couples_together(val_a, val_b, name_a, name_b):
 def discords_apart(val_a, val_b, name_a, name_b):
     return val_a != val_b
 
-def table_size(vals, names):
+def table_size_check(vals, names):
     return len(set(vals)) != 1
 
 def wedding_csp_problem():
@@ -32,9 +32,10 @@ def wedding_csp_problem():
         variables.append(Variable(guests[guest_idx], rotating_tables))
         tables_idx = (tables_idx + 1) % len(tables)
 
-    couples = (guests[:2], guests[2:4], guests[4:6])
+    couples = (guests[:2], guests[2:4], guests[4:6],
+               ('Matt', 'Scarlett'))
     discords = (('Lizzie', 'Grace'), ('Heather', 'DaveJr'),
-                ('Lizzie', 'Matt'))
+                ('Grace', 'Megan'))
     
     for pair in couples:
         constraints.append(BinaryConstraint(pair[0], pair[1],
@@ -58,12 +59,12 @@ def wedding_csp_problem():
 
     for oversize_set in lab4_expanded.itertools.combinations(guests,
                                                              tablesize + 1):
-        constraints.append(GroupConstraint(oversize_set, table_size,
+        constraints.append(GroupConstraint(oversize_set, table_size_check,
                                            "One table cannot seat more " +
                                            "than " + str(tablesize) +
                                            " people"))
 
     return CSP(constraints, variables)
 
-checker = lab4_expanded.forward_checking
+checker = lab4_expanded.forward_checking_prop_singleton
 solve_csp_problem(wedding_csp_problem, checker, verbose=True)

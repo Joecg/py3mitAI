@@ -25,7 +25,7 @@ def forward_checking(state, verbose=False):
         for y in Y_domain:
             if not c.check(state, value_i = x, value_j = y):
                 Y.reduce_domain(y)
-            if not Y.get_domain(): return False
+        if not Y.get_domain(): return False
     return True
 
 # Now Implement forward checking + (constraint) propagation through
@@ -51,7 +51,7 @@ def forward_checking_prop_singleton(state, verbose=False):
                                value_i = X.get_domain()[0],
                                value_j = y):
                     Y.reduce_domain(y)
-                if not Y.get_domain(): return False
+            if not Y.get_domain(): return False
             if ((Y.domain_size() == 1) and
                 not (Y in queue) and
                 not (Y in visited)): queue.append(Y)
@@ -108,7 +108,7 @@ def euclidean_distance(list1, list2):
 ## errors on the Senate.
 
 my_classifier = nearest_neighbors(euclidean_distance, 5)
-#evaluate(my_classifier, senate_group1, senate_group2, verbose=1)
+evaluate(my_classifier, senate_group1, senate_group2, verbose=1)
 
 ### Part 2: ID Trees
 #print(CongressIDTree(senate_people, senate_votes, homogeneous_disorder))

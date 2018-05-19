@@ -4,6 +4,7 @@ Implementation of a wedding seating csp problem.
 """
 import sys
 import lab4_expanded
+import time
 from csp_expanded import CSP, Variable, BinaryConstraint, solve_csp_problem
 from csp_expanded import basic_constraint_checker, GroupConstraint
 
@@ -67,4 +68,7 @@ def wedding_csp_problem():
     return CSP(constraints, variables)
 
 checker = lab4_expanded.forward_checking_prop_singleton
-solve_csp_problem(wedding_csp_problem, checker, verbose=True)
+start = time.time()
+solution = solve_csp_problem(wedding_csp_problem, checker, verbosity = 0)
+print(solution[0])
+print(time.time() - start)

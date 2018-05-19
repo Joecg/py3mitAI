@@ -8,22 +8,25 @@ from csp_expanded import BinaryConstraint, CSP, CSPState, Variable,\
 import itertools
 
 # Implement basic forward checking on the CSPState see csp.py
-def forward_checking(state, verbose=False):
+def forward_checking(state, verbosity = 0):
     # Before running Forward checking we must ensure
     # that constraints are okay for this state.
-    basic = basic_constraint_checker(state, verbose)
+    basic = basic_constraint_checker(state, verbosity)
     if not basic: return False
     X = state.get_current_variable()
     if X is None: return True
-    x = X.get_assigned_value()
     X_name = X.get_name()
+    if verbosity > 1: print(X_name)
+    x = X.get_assigned_value()
     X_constraints = state.get_constraints_by_name(X_name)
     for c in X_constraints:
+        if verbosity > 2: print(c)
         if type(c) == BinaryConstraint:
             Y_name = c.get_variable_j_name()
             Y = state.get_variable_by_name(Y_name)
             Y_domain = Y.get_domain()
             for y in Y_domain:
+                if verbosity > 3: print('Evaluation:', (x, y))
                 if not c.check(state, x, y): Y.reduce_domain(y)
             if not Y.get_domain(): return False
         elif type(c) == GroupConstraint:
@@ -37,6 +40,7 @@ def forward_checking(state, verbose=False):
             # replace them with Trues
             var_possibilities = [[False] * len(dom) for dom in var_dom]
             for var_combo in itertools.product(*var_dom):
+                if verbosity > 3: print('Evaluation:', var_combo)
                 if c.check(state, values = var_combo):
                     for var_idx in range(var_cnt):
                         val_idx = var_dom[var_idx].index(var_combo[var_idx])
@@ -55,26 +59,30 @@ def forward_checking(state, verbose=False):
 
 # Now Implement forward checking + (constraint) propagation through
 # singleton domains.
-def forward_checking_prop_singleton(state, verbose=False):
+def forward_checking_prop_singleton(state, verbosity = 0):
     # Run forward checking first.
-    if not forward_checking(state, verbose): return False
+    if not forward_checking(state, verbosity): return False
     queue = [v for v in state.get_all_variables()
              if v.domain_size() == 1]
     visited = []
     while queue:
         X = queue[0]
         X_name = X.get_name()
+        if verbosity > 1: print(X_name)
         visited.append(X)
         queue = queue[1:]
         X_constraints = state.get_constraints_by_name(X_name)
         for c in X_constraints:
+            if verbosity > 2: print(c)
             if type(c) == BinaryConstraint:
                 Y_name = c.get_variable_j_name()
                 Y = state.get_variable_by_name(Y_name)
                 Y_domain = Y.get_domain()
                 for y in Y_domain:
+                    x = X.get_domain()[0]
+                    if verbosity > 3: print('Evaluation:', (x, y))
                     if not c.check(state,
-                                   value_i = X.get_domain()[0],
+                                   value_i = x,
                                    value_j = y):
                         Y.reduce_domain(y)
                 if not Y.get_domain(): return False
@@ -93,6 +101,7 @@ def forward_checking_prop_singleton(state, verbose=False):
                 # replace them with Trues
                 var_possibilities = [[False] * len(dom) for dom in var_dom]
                 for var_combo in itertools.product(*var_dom):
+                    if verbosity > 3: print('Evaluation:', var_combo)
                     if c.check(state, values = var_combo):
                         for var_idx in range(var_cnt):
                             val_idx = var_dom[var_idx].index(var_combo[var_idx])

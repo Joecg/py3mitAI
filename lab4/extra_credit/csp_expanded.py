@@ -326,13 +326,14 @@ class CSPState:
         return buf
 
 
-def basic_constraint_checker(state, verbose=False):
+def basic_constraint_checker(state, verbosity = 0):
     """
     Basic constraint checker used to check at every assignment
     whether the assignment passes all the constraints
     """
     constraints = state.get_all_constraints()
     for constraint in constraints:
+        if verbosity > 2: print(constraint)
         if type(constraint) == BinaryConstraint:
             var_i = state.get_variable_by_name(constraint.get_variable_i_name())
             var_j = state.get_variable_by_name(constraint.get_variable_j_name())
@@ -346,9 +347,9 @@ def basic_constraint_checker(state, verbose=False):
                     any_continue = True
                     continue
             if any_continue: continue
-
+        if verbosity > 3: print('Evaluation')
         if not constraint.check(state):
-            if verbose:
+            if verbosity > 0:
                 print("CONSTRAINT-FAILS: %s" % (constraint))
             return False
     return True
@@ -412,7 +413,7 @@ class CSP:
 
     def solve(self,
               constraint_checker=basic_constraint_checker,
-              verbose=False):
+              verbosity = 0):
         """
         Perform a depth-first search with backtracking to solve
         This CSP problem.
@@ -433,12 +434,12 @@ class CSP:
             state = cur_node.value
             cur_node.step = step
 
-            if verbose:
+            if verbosity > 0:
                 print("-"*20)
                 print("%d. EXAMINING:\n%s" %(step, state.vd_table()))
 
-            if not constraint_checker(state, verbose):
-                if verbose:
+            if not constraint_checker(state, verbosity):
+                if verbosity > 0:
                     print("%d. FAIL:\n%s" %(step, state.vd_table()))
                 cur_node.status = Node.FAILED
                 step += 1
@@ -446,12 +447,12 @@ class CSP:
 
             if state.is_solution():
                 cur_node.status = Node.SOLUTION
-                if verbose:
+                if verbosity > 0:
                     print("%d. SOLUTION:\n%s" %(step, state.vd_table()))
                 return state, search_root
 
             cur_node.status = Node.CONTINUE
-            if verbose:
+            if verbosity > 0:
                 print("%d. CONTINUE:\n%s" %(step, state.vd_table()))
 
 
@@ -544,16 +545,16 @@ def simple_csp_problem():
     constraints.append(BinaryConstraint("A", "D", not_equal, "A != D"))
     return CSP(constraints, variables)
 
-def solve_csp_problem(problem, checker, verbose=False):
+def solve_csp_problem(problem, checker, verbosity = 0):
     """
     problem is a function that returns a CSP object that we can solve.
     checker is a function that implements the contraint checking.
     variable_order_cmp is a comparator for ordering the variables.
     """
     csp = problem()
-    answer, search_tree = csp.solve(checker, verbose=verbose)
+    answer, search_tree = csp.solve(checker, verbosity = verbosity)
 
-    if verbose:
+    if verbosity > 0:
         if answer is not None:
             print("ANSWER: %s" %(answer.solution()))
         else:
@@ -569,4 +570,4 @@ if __name__ == "__main__":
     #import lab4
     #fc_checker = lab4.forward_checking
     #fcps_checker = lab4.forward_checking_prop_singleton
-    solve_csp_problem(simple_csp_problem, checker, verbose=True)
+    solve_csp_problem(simple_csp_problem, checker, verbosity = 1)

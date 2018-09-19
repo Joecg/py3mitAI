@@ -81,14 +81,14 @@ class BinaryConstraint:
         names.
         """
         variable_i = state.get_variable_by_name(self.var_i_name)
-        if value_i is None and variable_i is not None:
+        if value_i is None and not variable_i is None:
             value_i = variable_i.get_assigned_value()
 
         variable_j = state.get_variable_by_name(self.var_j_name)
-        if value_j is None and variable_j is not None:
+        if value_j is None and not variable_j is None:
             value_j = variable_j.get_assigned_value()
 
-        if value_i is not None and value_j is not None:
+        if not value_i is None and not value_j is None:
             return self.check_func(value_i, value_j,
                                    self.var_i_name, self.var_j_name)
         else:
@@ -265,6 +265,16 @@ class CSPState:
         if variable is not None:
             variable.set_value(variable_value)
             self.variable_index = variable_index
+        # WEDDING ONLY: If table is now full, remove table from all domains
+        is_cnt = 0
+        for var in self.get_all_variables():
+            if var.is_assigned():
+                if var.get_assigned_value() == variable_value:
+                    is_cnt += 1
+        if is_cnt >= 10:
+            for var in self.get_all_variables():
+                if variable_value in var.get_domain():
+                    var.reduce_domain(variable_value)
 
     def get_variable_by_index(self, index):
         """
@@ -289,7 +299,7 @@ class CSPState:
         on this state.  This merely checks if all the variables
         have an assignment
         """
-        for var in self.variable_map.values():
+        for var in self.get_all_variables():
             if not var.is_assigned():
                 return False
         return True
@@ -327,7 +337,7 @@ class CSPState:
 
     def rev_print(self):
         value_dict = dict()
-        for variable in self.variable_map.values():
+        for variable in self.get_all_variables():
             if not variable.is_assigned():
                 continue
             value = variable.get_assigned_value()

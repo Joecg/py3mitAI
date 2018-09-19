@@ -1,4 +1,4 @@
-from sets import Set as set
+#from sets import Set as set
 from data_reader import *
 import math
 import orange_for_6034
@@ -143,7 +143,7 @@ class BoostClassifier(Classifier):
         correct class for a data point.
         """
         self.base_classifiers = base_classifiers
-        self.data = data 
+        self.data = data
         self.data_weights = [1.0/len(data) for d in data]
         self.classifiers = []
         self.standard = standard
@@ -161,8 +161,9 @@ class BoostClassifier(Classifier):
 
         returns: int (+1 or -1)
         """
-        # Fill me in! (the answer given is not correct!)
-        return 1
+        total = sum([a*c.classify(obj) for (c, a) in self.classifiers])
+        if total > 0: return 1
+        return -1
 
     def orange_classify(self, obj):
         """
@@ -177,8 +178,7 @@ class BoostClassifier(Classifier):
 
         returns: float (between 0 and 1)
         """
-        # Fill me in! (the answer given is not correct!)
-        return 1
+        return sigmoid(sum([a*c.classify(obj) for (c, a) in self.classifiers]))
 
     def best_classifier(self):
         """
@@ -253,7 +253,7 @@ class BoostClassifier(Classifier):
         self.renormalize_weights()
         best_classifier, best_error = self.best_classifier()
         if verbose:
-            print "[error=%4.4f]" % best_error, best_classifier
+            print("[error=%4.4f]" % best_error, best_classifier)
         self.update_weights(best_error, best_classifier)
         self.classifiers.append((best_classifier, error_to_alpha(best_error)))
 
@@ -266,8 +266,22 @@ class BoostClassifier(Classifier):
 
         returns: Nothing (only updates self.data_weights)
         """
-        # Fill me in!
-        pass
+        # wi * sqrt(E/(1-E)) / Z if correct
+        # wi * sqrt((1-E)/E) / Z if incorrect
+        if best_error == 1 or best_error == 0:
+            raise ValueError('%s makes zero errors' % best_classifier)
+        new_weights = []
+        r1 = sqrt(best_error / (1 - best_error))
+        r2 = 1.0 / r1
+        for i in range(len(self.data_weights)):
+            if (best_classifier.classify(data[i]) ==
+                self.standard.classify(data[i])): # If it's correct here...
+                new_weights.append(data_weights[i]) * r1
+            else: # best_classifier is incorrect for this data point
+                new_weights.append(data_weights[i]) * r2
+        self.data_weights = new_weights
+        # Now to factor in Z
+        self.renormalize_weights()
 
     def __str__(self):
         classifier_part = '\n'.join(["%4.4f: %s" % (weight, c) for c, weight in

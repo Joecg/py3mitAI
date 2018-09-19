@@ -35,10 +35,10 @@ class DifferentiableElement(object):
     parts that require some differentiable element.
     """
     def output(self):
-        raise NotImplementedError, "This is an abstract method"
+        raise NotImplementedError("This is an abstract method")
 
     def dOutdX(self, elem):
-        raise NotImplementedError, "This is an abstract method"
+        raise NotImplementedError("This is an abstract method")
 
     def clear_cache(self):
         """clears any precalculated cached value"""
@@ -57,25 +57,25 @@ class Input(ValuedElement,DifferentiableElement):
     def output(self):
         """
         Returns the output of this Input node.
-        
+
         returns: number (float or int)
         """
-        raise NotImplementedError, "Implement me!"
+        return self.get_value()
 
     def dOutdX(self, elem):
         """
-        Returns the derivative of this Input node with respect to 
+        Returns the derivative of this Input node with respect to
         elem.
 
         elem: an instance of Weight
 
         returns: number (float or int)
         """
-        raise NotImplementedError, "Implement me!"
+        return 0.0 # No directly connected input weights
 
 class Weight(ValuedElement):
     """
-    Representation of an weight into a Neural Unit.
+    Representation of a weight into a Neural Unit.
     """
     def __init__(self,name,val):
         ValuedElement.__init__(self,name,val)
@@ -113,7 +113,7 @@ class Neuron(DifferentiableElement):
             self.my_descendant_weights = {}
             inputs = self.get_inputs()
             weights = self.get_weights()
-            for i in xrange(len(weights)):
+            for i in range(len(weights)):
                 weight = weights[i]
                 weight_name = weight.get_name()
                 self.my_descendant_weights[weight_name] = set()
@@ -170,7 +170,12 @@ class Neuron(DifferentiableElement):
 
         returns: number (float or int)
         """
-        raise NotImplementedError, "Implement me!"
+        sigarg = 0
+        for idx in range(len(self.get_inputs())):
+            term = (self.get_inputs()[idx].output() *
+                    self.get_weights()[idx].get_value())
+            sigarg += term
+        return 1.0 / (1.0 + math.exp(-sigarg))
 
     def dOutdX(self, elem):
         # Implement compute_doutdx instead!!
@@ -190,7 +195,18 @@ class Neuron(DifferentiableElement):
 
         returns: number (float/int)
         """
-        raise NotImplementedError, "Implement me!"
+        sig_deriv = self.output() * (1 - self.output())
+        if self.has_weight(elem):
+            din_dw = self.get_inputs()[self.get_weights().index(elem)].output()
+            return sig_deriv * din_dw
+        else:
+            acc = 0
+            for idx in range(len(self.get_inputs())):
+                weight = self.get_weights()[idx]
+                if self.isa_descendant_weight_of(elem, weight):
+                    input = self.get_inputs()[idx]
+                    acc += weight.get_value() * input.dOutdX(elem)
+            return sig_deriv * acc
 
     def get_weights(self):
         return self.my_weights
@@ -222,10 +238,10 @@ class PerformanceElem(DifferentiableElement):
     def output(self):
         """
         Returns the output of this PerformanceElem node.
-        
+
         returns: number (float/int)
         """
-        raise NotImplementedError, "Implement me!"
+        return -0.5*(self.my_desired_val - self.get_input().output())**2
 
     def dOutdX(self, elem):
         """
@@ -236,7 +252,8 @@ class PerformanceElem(DifferentiableElement):
 
         returns: number (int/float)
         """
-        raise NotImplementedError, "Implement me!"
+        diff = (self.my_desired_val - self.get_input().output())
+        return diff * self.get_input().dOutdX(elem)
 
     def set_desired(self,new_desired):
         self.my_desired_val = new_desired
@@ -244,10 +261,8 @@ class PerformanceElem(DifferentiableElement):
     def get_input(self):
         return self.my_input
 
-def alphabetize(x,y):
-    if x.get_name()>y.get_name():
-        return 1
-    return -1
+def alphabetize(x):
+    return x.get_name()
 
 class Network(object):
     def __init__(self,performance_node,neurons):
@@ -256,7 +271,7 @@ class Network(object):
         self.performance = performance_node
         self.output = performance_node.get_input()
         self.neurons = neurons[:]
-        self.neurons.sort(cmp=alphabetize)
+        self.neurons.sort(key=alphabetize)
         for neuron in self.neurons:
             self.weights.extend(neuron.get_weights())
             for i in neuron.get_inputs():
@@ -271,18 +286,18 @@ class Network(object):
         for n in self.neurons:
             n.clear_cache()
 
-def seed_random():
+def seed_random(seed):
     """Seed the random number generator so that random
     numbers are deterministically 'random'"""
-    random.seed(0)
+    random.seed(seed)
 
 def random_weight():
     """Generate a deterministic random weight"""
-    # We found that random.randrange(-1,2) to work well emperically 
+    # We found that random.randrange(-1,2) to work well emperically
     # even though it produces randomly 3 integer values -1, 0, and 1.
     return random.randrange(-1, 2)
 
-    # Uncomment the following if you want to try a uniform distribuiton 
+    # Uncomment the following if you want to try a uniform distribuiton
     # of random numbers compare and see what the difference is.
     # return random.uniform(-1, 1)
 
@@ -335,7 +350,28 @@ def make_neural_net_two_layer():
     See 'make_neural_net_basic' for required naming convention for inputs,
     weights, and neurons.
     """
-    raise NotImplementedError, "Implement me!"
+    i0 = Input('i0', -1.0) # this input is immutable
+    i1 = Input('i1', 0.0)
+    i2 = Input('i2', 0.0)
+    seed_random(0)
+    w1A = Weight('w1A',random_weight())
+    w1B = Weight('w1B',random_weight())
+    w2A = Weight('w2A',random_weight())
+    w2B = Weight('w2B',random_weight())
+    wAC = Weight('wAC',random_weight())
+    wBC = Weight('wBC',random_weight())
+    wA  = Weight('wA', random_weight())
+    wB  = Weight('wB', random_weight())
+    wC  = Weight('wC', random_weight())
+
+    # Inputs must be in the same order as their associated weights
+    A = Neuron('A', [i1,i2,i0], [w1A,w2A,wA])
+    B = Neuron('B', [i1,i2,i0], [w1B,w2B,wB])
+    C = Neuron('C', [A, B, i0], [wAC,wBC,wC])
+    P = PerformanceElem(C, 0.0)
+
+    net = Network(P,[A, B, C])
+    return net
 
 def make_neural_net_challenging():
     """
@@ -346,8 +382,37 @@ def make_neural_net_challenging():
     See 'make_neural_net_basic' for required naming convention for inputs,
     weights, and neurons.
     """
+    i0 = Input('i0', -1.0) # this input is immutable
+    i1 = Input('i1', 0.0)
+    i2 = Input('i2', 0.0)
+    seed_random(3)
+    w1A = Weight('w1A',random_weight())
+    w1B = Weight('w1B',random_weight())
+    w2A = Weight('w2A',random_weight())
+    w2B = Weight('w2B',random_weight())
+    wAC = Weight('wAC',random_weight())
+    wBC = Weight('wBC',random_weight())
+    wAD = Weight('wAD',random_weight())
+    wBD = Weight('wBD',random_weight())
+    wCE = Weight('wCE',random_weight())
+    wDE = Weight('wDE',random_weight())
+    wA  = Weight('wA', random_weight())
+    wB  = Weight('wB', random_weight())
+    wC  = Weight('wC', random_weight())
+    wD  = Weight('wD', random_weight())
+    wE  = Weight('wE', random_weight())
 
-    raise NotImplementedError, "Implement me!"
+    # Inputs must be in the same order as their associated weights
+    A = Neuron('A', [i1,i2,i0], [w1A,w2A,wA])
+    B = Neuron('B', [i1,i2,i0], [w1B,w2B,wB])
+    C = Neuron('C', [A, B, i0], [wAC,wBC,wC])
+    D = Neuron('D', [A, B, i0], [wAD,wBD,wD])
+    E = Neuron('E', [C, D, i0], [wCE,wDE,wE])
+    P = PerformanceElem(E, 0.0)
+
+    net = Network(P, [A, B, C, D, E])
+    return net
+    raise NotImplementedError("Implement me!")
 
 def make_neural_net_with_weights():
     """
@@ -360,13 +425,13 @@ def make_neural_net_with_weights():
     # You can preset weights for the network by completing
     # and uncommenting the init_weights dictionary below.
     #
-    # init_weights = { 'w1A' : 0.0,
-    #                  'w2A' : 0.0,
-    #                  'w1B' : 0.0,
-    #                  'w2B' : 0.0,
-    #                  .... # finish me!
+    init_weights = {'w1A':-3.261747,'w2A': 3.363426,'wA':-4.496303,
+                    'w1B': 3.799687,'w2B':-3.673292,'wB':-5.125518,
+                    'wAC':-4.483763,'wBC': 9.087268,'wC':-0.280826,
+                    'wAD': 8.699772,'wBD':-2.096918,'wD': 1.801967,
+                    'wCE': 8.986164,'wDE': 9.088044,'wE':13.444173}
     #
-    raise NotImplementedError, "Implement me!"
+    #raise NotImplementedError("Implement me!")
     return make_net_with_init_weights_from_dict(make_neural_net_challenging,
                                                 init_weights)
 
@@ -388,7 +453,7 @@ def abs_mean(values):
     For computing the stopping condition for training neural nets"""
     abs_vals = map(lambda x: abs(x), values)
     total = sum(abs_vals)
-    return total / float(len(abs_vals))
+    return total / float(len(values))
 
 
 def train(network,
@@ -407,7 +472,7 @@ def train(network,
         performances = []  # store performance on each data point
         for datum in data:
             # set network inputs
-            for i in xrange(len(network.inputs)):
+            for i in range(len(network.inputs)):
                 network.inputs[i].set_value(datum[i])
 
             # set network desired output
@@ -436,18 +501,18 @@ def train(network,
 
         if abs_mean_performance < target_abs_mean_performance:
             if verbose:
-                print "iter %d: training complete.\n"\
+                print("iter %d: training complete.\n"\
                       "mean-abs-performance threshold %s reached (%1.6f)"\
                       %(iteration,
                         target_abs_mean_performance,
-                        abs_mean_performance)
+                        abs_mean_performance))
             break
 
         iteration += 1
         if iteration % 1000 == 0 and verbose:
-            print "iter %d: mean-abs-performance = %1.6f"\
+            print("iter %d: mean-abs-performance = %1.6f"\
                   %(iteration,
-                    abs_mean_performance)
+                    abs_mean_performance))
 
 
 def test(network, data, verbose=False):
@@ -467,15 +532,15 @@ def test(network, data, verbose=False):
         if round(result)==datum[-1]:
             correct+=1
             if verbose:
-                print "test(%s) returned: %s => %s [%s]" %(str(datum),
+                print("test(%s) returned: %s => %s [%s]" %(str(datum),
                                                            str(result),
                                                            rounded_result,
-                                                           "correct")
+                                                           "correct"))
         else:
             if verbose:
-                print "test(%s) returned: %s => %s [%s]" %(str(datum),
+                print("test(%s) returned: %s => %s [%s]" %(str(datum),
                                                            str(result),
                                                            rounded_result,
-                                                           "wrong")
+                                                           "wrong"))
 
     return float(correct)/len(data)
